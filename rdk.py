@@ -33,8 +33,9 @@ APERTURE_WIDTH = 4         # line width in pixels
 APERTURE_COLOR = COL_WHITE
 
 # fixation parameters
-FIX_SIZE = (40, 40)     # width and height of fix cross
+FIX_SIZE = (15, 15)     # width and height of fix cross
 FIX_COLOR = COL_WHITE
+FIX_WIDTH = 4 # line width
 
 
 def set_trials(n_reps=10, angles=[0, 90, 135], shuff=True):
@@ -52,17 +53,47 @@ def set_trials(n_reps=10, angles=[0, 90, 135], shuff=True):
 
 
 class RDK(object):
-    """represents a random dot stimulus"""
+    """implements a random dot stimulus"""
 
-    def __init__(self):
-        self.x = 1
+    def __init__(self, display):
+        self.display = display
 
+    def draw(self):
+        # draws dots
+        pass
+
+    def update(self):
+        # updates position of dots
+        pass
+        
 
 class Fixation(object):
-    """represents a fixation cross"""
+    """implements a fixation cross"""
 
-    def __init__(self):
-        self.x = 1
+    def __init__(self, display):
+        self.display = display
+        self.centre = [WINDOW_WIDTH/2, WINDOW_HEIGHT/2]
+        self.f_col = FIX_COLOR
+        self.f_width = FIX_WIDTH
+        self.f_size = FIX_SIZE
+        self.a_col = APERTURE_COLOR
+        self.a_size = APERTURE_RADIUS
+        self.a_width = APERTURE_WIDTH
+
+    def draw(self):
+        # draw aperture and and fixation cross
+        self.fix_x = pygame.draw.line(self.display, self.f_col,
+                        [self.centre[0]-self.f_size[0], self.centre[1]],
+                        [self.centre[0]+self.f_size[0], self.centre[1]],
+                        self.f_width)
+
+        self.fix_y = pygame.draw.line(self.display, self.f_col,
+                        [self.centre[0], self.centre[1]-self.f_size[1]],
+                        [self.centre[0], self.centre[1]+self.f_size[1]],
+                        self.f_width)
+
+        self.aperture = pygame.draw.circle(self.display, self.a_col,
+                        self.centre, self.a_size, self.a_width)
 
 
 def main():
@@ -75,33 +106,44 @@ def main():
     pygame.display.set_caption(WINDOW_NAME)
     display.fill(COL_BLACK)
     # init new experiment (fixation and stimulus)
-    rdk = RDK()
-    fix = Fixation()
+    rdk = RDK(display)
+    fix = Fixation(display)
 
     # define trials
     trials = set_trials(n_reps=DOT_REPETITIONS, angles=DOT_ANGLES)
 
-    # loop through trials
-    for ii, angle in enumerate(trials):
-        # randomise dots
-        rdk.randomise()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-        # show fixation
         fix.draw()
+        pygame.display.flip()
+        print("tick " + str(pygame.time.get_ticks()))
+        clock.tick(1)
+    #
+    # # loop through trials
+    # for ii, angle in enumerate(trials):
+    #     # randomise dots
+    #     rdk.randomise()
+    #
+    #     # show fixation
+    #     fix.draw()
+    #
+    #     time.sleep(TIME_FIX)
+    #     # show RDK
+    #     # rdk.draw(angle)
+    #     # time.sleep(TIME_RDK)
+    #
+    #     # show ITI
+    #     display.fill(COL_BLACK)
+    #     time.sleep(TIME_ITI)
+    #     # run at 60pfs
+    #     # clock.tick(60)
+    #     pass
 
-        time.sleep(TIME_FIX)
-        # show RDK
-        # rdk.draw(angle)
-        # time.sleep(TIME_RDK)
-
-        # show ITI
-        display.fill(COL_BLACK)
-        time.sleep(TIME_ITI)
-        # run at 60pfs
-        # clock.tick(60)
-        pass
-
-    time.sleep(10)
+    time.sleep(2)
     pygame.quit()
     quit()
 
