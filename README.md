@@ -3,6 +3,8 @@ a random dot kinematogram implemented in pygame
 
 
 ### todo list
+- skewed sampling https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.random.choice.html
+- .. also see my old matlab code for inspiration
 1. class rdk
 - displays random dots
   - size
