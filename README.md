@@ -43,10 +43,3 @@ You can also change the speed with which dots move over the screen (in terms of 
 
 **2. Fast dots**   
 ![fewandlargefast](gifs/largeandfew_fast.gif)  
-
-
-### Explanation of parameters
-
-1. interface:
-  - flags!!!!
-1. class inheritance
