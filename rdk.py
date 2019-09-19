@@ -9,6 +9,7 @@ import numpy as np
 from math import cos, sin, atan2, radians, degrees
 import time
 import matplotlib.pyplot as plt
+from array2gif import write_gif
 
 # basic parameters
 WINDOW_WIDTH = 250
@@ -23,11 +24,11 @@ COL_WHITE = (255, 255, 255)
 TICK_RATE = 60
 TIME_FIX = 20  # frames
 TIME_ISI = 30
-TIME_RDK = 30
+TIME_RDK = 60
 TIME_ITI = 60
 
 # dot parameters
-N_DOTS = 100         # max num of simultaneously displayed dots
+N_DOTS = 200         # max num of simultaneously displayed dots
 DOT_SIZE = 3         # size in pixels
 DOT_SPEED = 4        # speed in pixels per frame
 DOT_ANGLES = [0, 45, 90, 112, 240, 315]  # motion directions
@@ -134,7 +135,7 @@ class RDK(object):
         self.motiondir = motiondir
         self.dots = self.sample_dots(self.maxrad, self.ndots)
         self.clock = pygame.time.Clock()
-        self.fix = Fixation(self.display)
+        # self.fix = Fixation(self.display)
 
     def draw(self):
         # draws dots
@@ -147,10 +148,13 @@ class RDK(object):
         while self.duration > 0:
             self.clock.tick(TICK_RATE)
             self.display.fill(COL_BLACK)
-            self.fix.draw()
+            # self.fix.draw()
             self.draw()
             pygame.display.update()
-            allframes[ii, :, :] = self.collect_frame()
+            frame = self.collect_frame()
+            frame = frame.astype('float32')
+            frame *= (255.0/frame.max())
+            allframes[ii, :, :] = frame
             ii += 1
             self.duration -= 1
             self.update()
@@ -226,7 +230,10 @@ class Fixation(object):
             self.clock.tick(TICK_RATE)
             self.draw()
             pygame.display.flip()
-            allframes[ii, :, :] = self.collect_frame()
+            frame = self.collect_frame()
+            frame = frame.astype('float32')
+            frame *= (255.0/frame.max())
+            allframes[ii, :, :] = frame
             ii += 1
             self.f_duration -= 1
         self.f_duration = TIME_FIX
@@ -263,7 +270,10 @@ class BlankScreen(object):
         while self.duration > 0:
             self.clock.tick(TICK_RATE)
             pygame.display.update()
-            allframes[ii, :, :] = self.collect_frame()
+            frame = self.collect_frame()
+            frame = frame.astype('float32')
+            frame *= (255.0/frame.max())
+            allframes[ii, :, :] = frame
             ii += 1
             self.duration -= 1
         self.duration = self.duration_init
@@ -302,12 +312,32 @@ class TrialSequence(object):
 
 def main():
     trials = set_trials(n_reps=DOT_REPETITIONS, angles=DOT_ANGLES)
-    trial_seq = TrialSequence()
+    # trial_seq = TrialSequence()
+    # allframes = np.array([])
+    # for ii, thisAngle in enumerate(trials[0:5]):
+    #     frames = trial_seq.run(thisAngle)
+    #     allframes = np.concatenate((allframes,frames),axis=0) if len(allframes) else frames
 
-    for ii, thisAngle in enumerate(trials):
-        trial_seq.run(thisAngle)
+    pygame.init()
+    clock = pygame.time.Clock()
+    display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption(WINDOW_NAME)
+    display.fill(COL_BLACK)
+    rdk = RDK(display)
 
+    rdk.new_sample(20)
+    frames = rdk.show()
     pygame.quit()
+    # print(allframes.shape)
+    frame_list = [np.squeeze(np.stack((frames[ii,:,:],) * 3, axis=0)) for ii in range(frames.shape[0])]
+
+    # print(len(frame_list))
+    # print(frame_list[0].shape)
+    # print(np.max(frame_list[0]))
+    # print(np.min(frame_list[0]))
+    write_gif(list(frame_list),'smallandmany.gif',fps=60)
+
+
     quit()
 
 
