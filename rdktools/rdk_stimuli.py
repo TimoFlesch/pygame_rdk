@@ -8,7 +8,7 @@ import random
 import numpy as np
 from math import cos, sin, atan2, radians, degrees
 import matplotlib.pyplot as plt
-from array2gif import write_gif
+# from array2gif import write_gif
 
 import rdktools.rdk_params as params
 from rdktools.rdk_helper import polar2cartesian, cartesian2polar
